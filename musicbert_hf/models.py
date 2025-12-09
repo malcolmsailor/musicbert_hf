@@ -8,17 +8,28 @@ from torch.nn import CrossEntropyLoss
 from transformers import BertConfig, BertModel, BertPreTrainedModel
 from transformers.modeling_outputs import MaskedLMOutput, TokenClassifierOutput
 from transformers.models.bert.modeling_bert import (
-    BERT_INPUTS_DOCSTRING,
-    BERT_START_DOCSTRING,
+    # BERT_INPUTS_DOCSTRING,
+    # BERT_START_DOCSTRING,
     BertEmbeddings,
     BertEncoder,
     BertOnlyMLMHead,
 )
 from transformers.utils import (
-    add_start_docstrings,
-    add_start_docstrings_to_model_forward,
+    # add_start_docstrings,
+    # add_start_docstrings_to_model_forward,
     logging,
 )
+
+try:
+    from transformers.utils.auto_docstring import auto_docstring
+except ImportError:
+    # For backward compatibility with transformers before the auto_docstring decorator
+    def auto_docstring(custom_intro: str):
+        def decorator(cls):
+            return cls
+
+        return decorator
+
 
 from musicbert_hf import from_fairseq
 from musicbert_hf.constants import INPUT_PAD
@@ -220,9 +231,7 @@ class MusicBertConfig(BertConfig):
         self.fairseq_position_embeddings = fairseq_position_embeddings
 
 
-@add_start_docstrings(
-    """MusicBert model for MLM pre-training task.""", BERT_START_DOCSTRING
-)
+@auto_docstring(custom_intro="""MusicBert model for MLM pre-training task.""")
 class MusicBert(BertPreTrainedModel):
     # (Malcolm 2024-03-12) BertForMaskedLM defines the following attributes. However,
     #   tied weights are not implemented for MusicBert.
@@ -252,9 +261,12 @@ class MusicBert(BertPreTrainedModel):
     def set_output_embeddings(self, new_embeddings):
         self.cls.predictions.decoder = new_embeddings
 
-    @add_start_docstrings_to_model_forward(
-        BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
-    )
+    # In transformers v5, this decorator and the BERT_INPUTS_DOCSTRING
+    #  seem to be gone, in favor (I guess) of auto_docstring used above.
+    # @add_start_docstrings_to_model_forward(
+    #     BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
+    # )
+
     def forward(
         self,
         input_ids: Optional[torch.Tensor] = None,
@@ -418,9 +430,9 @@ class MusicBertTokenClassification(BertPreTrainedModel):
 
         return loss  # / num_items_in_batch
 
-    @add_start_docstrings_to_model_forward(
-        BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
-    )
+    # @add_start_docstrings_to_model_forward(
+    #     BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
+    # )
     def forward(
         self,
         input_ids: Optional[torch.Tensor] = None,
@@ -626,9 +638,9 @@ class MusicBertMultiTaskTokenClassification(BertPreTrainedModel):
         loss = torch.stack(losses).mean()
         return loss
 
-    @add_start_docstrings_to_model_forward(
-        BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
-    )
+    # @add_start_docstrings_to_model_forward(
+    #     BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
+    # )
     def forward(
         self,
         input_ids: Optional[torch.Tensor] = None,
@@ -845,9 +857,9 @@ class MusicBertMultiTaskTokenClassConditioned(BertPreTrainedModel):
         loss = torch.stack(losses).mean()
         return loss
 
-    @add_start_docstrings_to_model_forward(
-        BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
-    )
+    # @add_start_docstrings_to_model_forward(
+    #     BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
+    # )
     def forward(
         self,
         conditioning_ids: torch.Tensor,

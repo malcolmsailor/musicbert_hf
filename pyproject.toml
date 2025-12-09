@@ -1,6 +1,6 @@
 [project]
 name = "musicbert_hf"
-version = "0.0.1"
+version = "0.0.2"
 description = "HuggingFace implementation of MusicBERT"
 authors = [{ name = "Malcolm Sailor", email = "malcolm.sailor@gmail.com" }]
 readme = "README.md"
